@@ -19,6 +19,7 @@ namespace cloud_bot
                               D2Exe = "D2loader.exe",
                               D2Args = "-w -noplugin",
                               D2BSDLL = String.Empty;
+        private static int LoadDelay = 1000;
         private BindingList<ProcessWrapper> processes = new BindingList<ProcessWrapper>();
 
         private void refreshButton_Click(object sender, EventArgs e)
@@ -31,26 +32,69 @@ namespace cloud_bot
                     Console.WriteLine("ok we have d2");
                     ProcessWrapper pw = new ProcessWrapper(process);
                     processes.Add(pw);
-
                 }
             }
         }
 
         private void createButton_Click(object sender, EventArgs e)
         {
+            ProcessStartInfo psi = new ProcessStartInfo(Path.Combine(D2Path, D2Exe), D2Args)
+            {
+                UseShellExecute = false,
+                WorkingDirectory = D2Path
+            };
+            Process diabloProcess = Process.Start(psi);
+            System.Threading.Thread.Sleep(LoadDelay);
+            ProcessWrapper pw = new ProcessWrapper(diabloProcess);
+            processes.Add(pw);
+        }
 
+        private void injectButton_Click(object sender, EventArgs e)
+        {
+            if (processListView.SelectedIndex == -1)
+            {
+                SetStatus("No process selected!", Color.Blue);
+                return;
+            }
+            ProcessWrapper pw = processListView.SelectedItem as ProcessWrapper;
+            if (Attach(pw.Process))
+            {
+                SetStatus("Success!", Color.Green);
+                pw.Loaded = true;
+            }
+            else
+            {
+                SetStatus("Failed!", Color.Red);
+                pw.Loaded = false;
+            }
         }
 
         public Main(string[] args)
         {
             InitializeComponent();
             processes.RaiseListChangedEvents = true;
-            Console.WriteLine("################222222");
             processListView.DataSource = processes;
             processListView.DisplayMember = "ProcessName";
         }
 
         //utils
+        private delegate void StatusCallback(string status, System.Drawing.Color color);
+        private void SetStatus(string status, Color color)
+        {
+            // ignore the call if we haven't init'd the window yet
+            if (statusLabel == null)
+                return;
+
+            if (statusLabel.InvokeRequired)
+            {
+                StatusCallback cb = SetStatus;
+                statusLabel.Invoke(cb, status, color);
+                return;
+            }
+            statusLabel.ForeColor = color;
+            statusLabel.Text = status;
+        }
+
         private static bool IsD2Window(Process p)
         {
             if (p == null)
@@ -77,6 +121,26 @@ namespace cloud_bot
                 }
             }
             return "";
+        }
+
+        //most important funciton
+        private static bool Attach(Process p)
+        {
+            string js32 = Path.Combine(Application.StartupPath, "js32.dll"),
+                  libnspr = Path.Combine(Application.StartupPath, "libnspr4.dll");
+
+            return File.Exists(libnspr) && File.Exists(js32) &&
+              PInvoke.Kernel32.LoadRemoteLibrary(p, libnspr) &&
+              PInvoke.Kernel32.LoadRemoteLibrary(p, js32);
+            /*
+                        string js32 = Path.Combine(Application.StartupPath, "js32.dll"),
+                               libnspr = Path.Combine(Application.StartupPath, "libnspr4.dll"),
+                               d2bs = Path.Combine(Application.StartupPath, D2BSDLL);
+                        return File.Exists(libnspr) && File.Exists(js32) && File.Exists(d2bs) &&
+                                PInvoke.Kernel32.LoadRemoteLibrary(p, libnspr) &&
+                                PInvoke.Kernel32.LoadRemoteLibrary(p, js32) &&
+                                PInvoke.Kernel32.LoadRemoteLibrary(p, d2bs);
+                                */
         }
     }
 

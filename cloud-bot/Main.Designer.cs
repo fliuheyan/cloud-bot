@@ -32,6 +32,7 @@
             this.injectButton = new System.Windows.Forms.Button();
             this.refreshButton = new System.Windows.Forms.Button();
             this.processListView = new System.Windows.Forms.ListBox();
+            this.statusLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // createButton
@@ -42,6 +43,7 @@
             this.createButton.TabIndex = 0;
             this.createButton.Text = "create";
             this.createButton.UseVisualStyleBackColor = true;
+            this.createButton.Click += new System.EventHandler(this.createButton_Click);
             // 
             // injectButton
             // 
@@ -51,7 +53,7 @@
             this.injectButton.TabIndex = 2;
             this.injectButton.Text = "inject";
             this.injectButton.UseVisualStyleBackColor = true;
-            this.injectButton.Click += new System.EventHandler(this.createButton_Click);
+            this.injectButton.Click += new System.EventHandler(this.injectButton_Click);
             // 
             // refreshButton
             // 
@@ -72,11 +74,21 @@
             this.processListView.Size = new System.Drawing.Size(481, 238);
             this.processListView.TabIndex = 5;
             // 
+            // statusLabel
+            // 
+            this.statusLabel.AutoSize = true;
+            this.statusLabel.Location = new System.Drawing.Point(392, 91);
+            this.statusLabel.Name = "statusLabel";
+            this.statusLabel.Size = new System.Drawing.Size(107, 18);
+            this.statusLabel.TabIndex = 6;
+            this.statusLabel.Text = "statusLabel";
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.statusLabel);
             this.Controls.Add(this.processListView);
             this.Controls.Add(this.refreshButton);
             this.Controls.Add(this.injectButton);
@@ -84,6 +96,7 @@
             this.Name = "Main";
             this.Text = "Cloud-Bot";
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -93,6 +106,7 @@
         private System.Windows.Forms.Button injectButton;
         private System.Windows.Forms.Button refreshButton;
         private System.Windows.Forms.ListBox processListView;
+        private System.Windows.Forms.Label statusLabel;
     }
 
 
